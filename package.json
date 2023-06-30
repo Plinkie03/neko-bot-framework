@@ -5,11 +5,15 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
+    "write-exports": "tsc && node dist/functions/writeExports",
     "preinstall": "tsc",
     "test": "tsc && node dist/__tests__/runner"
   },
   "keywords": [],
   "author": "",
+  "engines": {
+    "node": ">=20.1.0"
+  },
   "license": "ISC",
   "dependencies": {
     "discord.js": "^14.11.0",
