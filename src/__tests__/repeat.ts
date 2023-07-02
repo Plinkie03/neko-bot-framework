@@ -4,7 +4,7 @@ function generateBar(
     current: number,
     max: number
 ) {
-    return fill.repeat(current) + empty.repeat(max - current)
+    return fill.repeat(current) + empty.repeat(max - current);
 }
 
 console.log(
@@ -14,4 +14,4 @@ console.log(
         5,
         10
     )
-)
+);

@@ -4,7 +4,7 @@ import { NekoPrebuiltHandlers } from "../classes/NekoPrebuiltHandlers.js";
 import { NekoCommand } from "../classes/NekoCommand.js";
 import { NekoCommandError } from "../classes/NekoCommandError.js";
 
-export type SendableArgs = Exclude<Parameters<ChatInputCommandInteraction<'cached'>['reply']>[0], string>
+export type SendableArgs = Exclude<Parameters<ChatInputCommandInteraction<"cached">["reply"]>[0], string>
 
 export interface IPathsData {
     commands: string
@@ -14,9 +14,9 @@ export interface IPathsData {
 }
 
 export interface IFactoriesData {
-    cooldownMessage: (this: NekoClient, input: Interaction<'cached'>, name: string, timeLeft: number) => Promise<SendableArgs> | SendableArgs
-    unknownErrorMessage: (this: NekoClient, input: Interaction<'cached'>, name: string, error: Error) => Promise<SendableArgs> | SendableArgs,
-    knownErrorMessage: (this: NekoClient, input: Interaction<'cached'>, name: string, error: NekoCommandError) => Promise<SendableArgs> | SendableArgs,   
+    cooldownMessage: (this: NekoClient, input: Interaction<"cached">, name: string, timeLeft: number) => Promise<SendableArgs> | SendableArgs
+    unknownErrorMessage: (this: NekoClient, input: Interaction<"cached">, name: string, error: Error) => Promise<SendableArgs> | SendableArgs,
+    knownErrorMessage: (this: NekoClient, input: Interaction<"cached">, name: string, error: NekoCommandError) => Promise<SendableArgs> | SendableArgs,
 }
 
 export interface INekoClientOptions extends ClientOptions {
@@ -34,36 +34,36 @@ export class NekoClient extends Client<true> {
             unknownErrorMessage: NekoPrebuiltHandlers.unknownErrorMessage,
             cooldownMessage: NekoPrebuiltHandlers.cooldownMessage
         }
-    }
+    };
 
-    manager = new NekoManager(this)
+    manager = new NekoManager(this);
     declare public options: (Omit<ClientOptions, "intents"> & { intents: IntentsBitField; }) & INekoClientOptions;
 
     constructor(options: INekoClientOptions) {
-        super(options)
+        super(options);
         this.options = {
             ...NekoClient.DefaultOptions,
             ...this.options
-        }
+        };
 
-        this.#setup()
+        this.#setup();
     }
 
     #setup() {
         if (this.options.useCommandHandler) {
-            this.on('interactionCreate', NekoPrebuiltHandlers.commandHandler.bind(this))
+            this.on("interactionCreate", NekoPrebuiltHandlers.commandHandler.bind(this));
         }
 
         if (this.options.registerCommandsOnReady) {
-            this.once('ready', NekoPrebuiltHandlers.registerCommands)
+            this.once("ready", NekoPrebuiltHandlers.registerCommands);
         }
 
         if (this.options.useInteractionHandler) {
-            this.on('interactionCreate', NekoPrebuiltHandlers.interactionHandler)
+            this.on("interactionCreate", NekoPrebuiltHandlers.interactionHandler);
         }
     }
 
     public login(token?: string | undefined): Promise<string> {
-        return this.manager.register().then(() => super.login(token))
+        return this.manager.register().then(() => super.login(token));
     }
 }
