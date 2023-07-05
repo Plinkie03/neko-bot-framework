@@ -1,5 +1,6 @@
 import { inspect } from "util";
 import { Markdown, NekoArg, NekoCommand } from "../../index.js";
+import { CustomArgType } from "../custom/bool.js";
 
 export default new NekoCommand()
     .setName("eval")
@@ -14,7 +15,15 @@ export default new NekoCommand()
         new NekoArg("code").required.string
             .setDescription("The code to eval")
     )
-    .setHandle(async function(i, { code }) {
+    .addArg(
+        new NekoArg("bro").optional
+            .setCustom<boolean>(CustomArgType.Bool)
+            .setDescription("Idk")
+            .setDefault(() => false)
+    )
+    .setHandle(async function(i, { code, bro }) {
+        console.log(bro);
+
         let evaled;
         try {
             evaled = await eval(code);

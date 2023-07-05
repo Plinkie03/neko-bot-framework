@@ -4,7 +4,7 @@ import { NekoClient } from "../core/NekoClient.js";
 export class NekoArgType<T = any, V = any> {
     public type!: T;
     public realType!: ApplicationCommandOptionType;
-    public handle!: (this: NekoClient, input: ChatInputCommandInteraction<"cached">, value: string | null | boolean | number) => V | Promise<V>;
+    public handle!: (this: NekoClient, input: ChatInputCommandInteraction<"cached">, value: string | boolean | number) => V | Promise<V>;
 
     setType<T>(type: T) {
         Reflect.set(this, "type", type);

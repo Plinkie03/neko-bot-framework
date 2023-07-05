@@ -8,6 +8,7 @@ export * from "./classes/NekoEvent.js";
 export * from "./classes/NekoInteractionEvent.js";
 export * from "./classes/NekoPrebuiltHandlers.js";
 export * from "./classes/TimedAction.js";
+export * from "./classes/Util.js";
 export * from "./core/NekoClient.js";
 export * from "./core/NekoManager.js";
 export * from "./core/NekoResources.js";

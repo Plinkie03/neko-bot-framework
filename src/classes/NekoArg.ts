@@ -72,13 +72,14 @@ export class NekoArg<Name extends string = string, Type = unknown> {
         this.data.realArgType = ApplicationCommandOptionType.Integer;
         return this.cast();
     }
+
     setCustom<Type>(customTypeName: unknown): NekoArg<Name, Type> {
         this.data.type = ArgType.Custom;
         this.data.customType = customTypeName;
         return this.cast();
     }
 
-    setDefault(v: Type): NekoArg<Name, Exclude<Type, null>> {
+    setDefault(v: this["data"]["default"]): NekoArg<Name, Exclude<Type, null>> {
         this.data.default = v;
         return this.cast();
     }
@@ -131,7 +132,9 @@ export class NekoArg<Name extends string = string, Type = unknown> {
 
         switch (this.data.type) {
             case ArgType.Custom: {
-                value = await client.manager.getCustomArgType(this.data.customType).handle.call(client, input, input.options.get(this.data.name, this.data.required)?.value ?? null);
+                const got = input.options.get(this.data.name, this.data.required)?.value ?? null;
+                if (got === null) break;
+                value = await client.manager.getCustomArgType(this.data.customType).handle.call(client, input, got);
                 break;
             }
 
@@ -149,6 +152,10 @@ export class NekoArg<Name extends string = string, Type = unknown> {
                 value = input.options.getString(this.data.name, this.data.required);
                 break;
             }
+        }
+
+        if (value === null && this.data.default !== undefined) {
+            value = typeof this.data.default === "function" ? await this.data.default.call(client, input) : this.data.default;
         }
 
         if (value === undefined) {

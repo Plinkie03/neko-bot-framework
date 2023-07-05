@@ -7,5 +7,5 @@ export default new NekoArgType()
     .setType(CustomArgType.Bool)
     .setRealType(ApplicationCommandOptionType.Boolean)
     .setHandle(function(input, raw) {
-        return Boolean(raw);
+        return raw as boolean;
     });
