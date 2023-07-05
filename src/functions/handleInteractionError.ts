@@ -3,6 +3,7 @@ import { SendableArgs } from "../core/NekoClient.js";
 import { getNekoClient } from "./getNekoClient.js";
 import { NekoCommandError } from "../classes/NekoCommandError.js";
 import { getInteractionName } from "./getInteractionName.js";
+import { replyInteraction } from "./replyInteraction.js";
 
 export async function handleInteractionError(input: Interaction<"cached">, error: unknown) {
     const client = getNekoClient(input);
@@ -10,14 +11,7 @@ export async function handleInteractionError(input: Interaction<"cached">, error
 
     const reply = async (args?: SendableArgs) => {
         if (!args) return;
-
-        if (input.isRepliable()) {
-            if (!input.replied) {
-                await input.reply(args);
-            } else {
-                await input.editReply(args);
-            }
-        }
+        return replyInteraction(input, args);
     };
 
     if (error instanceof NekoCommandError) {

@@ -1,4 +1,4 @@
-import { NekoEvent } from "../../../src/index.js";
+import { NekoEvent } from "../../../index.js";
 
 export default new NekoEvent(true)
     .setListener("ready")

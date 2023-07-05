@@ -58,14 +58,14 @@ export class NekoManager {
     }
 
     private async registerInteractionHandlers(path: string) {
-        const loaded = await NekoResources.loadAllFiles<NekoInteractionEvent>(path);
+        const loaded = await NekoResources.loadAllFiles(path, NekoInteractionEvent);
         for (const handler of loaded) {
-            this.interactionHandlers.ensure(handler.data.listener, () => []).push(handler);
+            this.interactionHandlers.ensure(handler.data.listener, () => []).push(handler as NekoInteractionEvent);
         }
     }
 
     private async registerEvents(path: string) {
-        const loaded = await NekoResources.loadAllFiles<NekoEvent>(path);
+        const loaded = await NekoResources.loadAllFiles(path, NekoEvent);
 
         for (const event of loaded) {
             this.client[event.once ? "once" : "on"](event.listener, event.handle.bind(this.client));
@@ -81,20 +81,20 @@ export class NekoManager {
                     const subFileStats = lstatSync(`${path}/${mainFile}/${subFile}`);
                     if (subFileStats.isDirectory()) {
                         for (const groupFile of readdirSync(`${path}/${mainFile}/${subFile}`)) {
-                            const commands = await NekoResources.loadFile<NekoCommand>(`${path}/${mainFile}/${subFile}`, groupFile);
+                            const commands = await NekoResources.loadFile(`${path}/${mainFile}/${subFile}`, groupFile, NekoCommand) as NekoCommand[];
                             commands.forEach(
                                 x => ((this.commands.ensure(mainFile, () => new Collection()) as Collection<string, Collection<string, NekoCommand>>).ensure(subFile, () => new Collection()) as Collection<string, NekoCommand>).set(x.data.name, x)
                             );
                         }
                     } else {
-                        const commands = await NekoResources.loadFile<NekoCommand>(`${path}/${mainFile}`, subFile);
+                        const commands = await NekoResources.loadFile(`${path}/${mainFile}`, subFile, NekoCommand) as NekoCommand[];
                         commands.forEach(
                             x => (this.commands.ensure(mainFile, () => new Collection()) as Collection<string, NekoCommand>).set(x.data.name, x)
                         );
                     }
                 }
             } else {
-                const commands = await NekoResources.loadFile<NekoCommand>(path, mainFile);
+                const commands = await NekoResources.loadFile(path, mainFile, NekoCommand) as NekoCommand[];
                 commands.forEach(
                     x => this.commands.set(x.data.name, x)
                 );
@@ -144,7 +144,7 @@ export class NekoManager {
     }
 
     private async registerCustomArgTypes(path: string) {
-        const loaded = await NekoResources.loadAllFiles<NekoArgType>(path);
+        const loaded = await NekoResources.loadAllFiles(path, NekoArgType);
         for (const load of loaded) this.customArgTypes.set(load.type, load);
     }
 

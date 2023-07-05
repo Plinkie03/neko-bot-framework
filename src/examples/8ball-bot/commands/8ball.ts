@@ -1,4 +1,4 @@
-import { NekoArg, NekoCommand, TimeParser } from "../../../src/index.js";
+import { NekoArg, NekoCommand } from "../../../index.js";
 
 const Responses = [
     "Maybe?",
@@ -10,7 +10,7 @@ const Responses = [
 export default new NekoCommand()
     .setName("eightball")
     .setDescription("I don't know what to say.")
-    .setCooldown(TimeParser.parseToMS("10s"))
+    .setCooldown(1e4)
     .addArg(
         new NekoArg().string.required
             .setName("question")

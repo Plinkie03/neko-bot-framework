@@ -3,6 +3,7 @@ import { NekoArg } from "./NekoArg.js";
 import { NekoClient, SendableArgs } from "../core/NekoClient.js";
 import { NekoCommandError } from "./NekoCommandError.js";
 import { handleInteractionError as handleError } from "../functions/handleInteractionError.js";
+import { replyInteraction } from "../functions/replyInteraction.js";
 
 export type GetArgsRecord<T> = {
     [P in GetArgsData<T>[number] as P[0]]: P[1]
@@ -16,6 +17,8 @@ export type GetArgsData<T> = T extends [
     ...GetArgsData<R>
 ] : []
 
+export type CommandConditionFn<Args extends [...NekoArg[]], Extras> = (this: NekoClient, input: ChatInputCommandInteraction<"cached">, command: NekoCommand<Args, Extras>, extras: Extras) => Promise<boolean | SendableArgs> | boolean | SendableArgs
+
 export interface ICommandData<Args extends [...NekoArg[]], Extras> {
     name: string
     description: string
@@ -23,7 +26,7 @@ export interface ICommandData<Args extends [...NekoArg[]], Extras> {
     permissions?: PermissionsString[]
     defer?: boolean
     dmAllowed?: boolean
-    check?: (this: NekoClient, input: ChatInputCommandInteraction<"cached">, command: NekoCommand<Args, Extras>, extras: Extras) => Promise<boolean | SendableArgs> | boolean | SendableArgs
+    conditions: CommandConditionFn<Args, Extras>[]
     cooldown?: number | ((this: NekoClient, input: ChatInputCommandInteraction<"cached">, command: NekoCommand<Args, Extras>) => number | Promise<number>)
     extras?: (this: NekoClient, input: ChatInputCommandInteraction<"cached">, command: NekoCommand<Args, Extras>) => Extras
     args?: [...Args]
@@ -40,23 +43,34 @@ export class NekoCommand<Args extends [...NekoArg[]] = [], Extras = any> {
         return this as unknown as NekoCommand<Args, Extras>;
     }
 
+    /**
+     * Toggles nsfw only channel for this command
+     */
     get nsfw() {
         this.data.nsfw = true;
         return this;
     }
 
+    /**
+     * Toggles dm permission for this command.
+     */
     get dmAllowed() {
         this.data.dmAllowed = true;
         return this;
     }
 
+    /**
+     * The name of the command
+     * @param n
+     * @returns
+     */
     setName(n: string) {
         this.data.name = n;
         return this;
     }
 
     /**
-     *
+     * The cooldown in milliseconds for this command before an user can run it again.
      * @param n
      * @returns
      * @example <NekoCommand>.setCooldown(TimeParser.parseToMS("1m"))
@@ -76,21 +90,55 @@ export class NekoCommand<Args extends [...NekoArg[]] = [], Extras = any> {
         ], Extras>;
     }
 
+    /**
+     * Sets the description for this command.
+     * @param desc
+     * @returns
+     */
     setDescription(desc: string) {
         this.data.description = desc;
         return this;
     }
 
+    /**
+     * The function that will be called when a user executes this command.
+     * @param fn
+     * @returns
+     */
     setHandle(fn: ICommandData<Args, Extras>["handle"]) {
         this.data.handle = fn;
         return this;
     }
 
+    /**
+     * The conditions to meet for an user before the handle is executed.
+     *
+     * To meet a condition the function has to return true.
+     *
+     * To reject the condition, the function has to return false (for no command response) or a message response that will be used to reply to this interaction.
+     * @param conditions
+     */
+    setConditions(...conditions: CommandConditionFn<Args, Extras>[]) {
+        this.data.conditions = conditions;
+        return this;
+    }
+
+    /**
+     * The permissions an user must have to view/execute this command.
+     * @param perms
+     * @returns
+     */
     setPermissions(...perms: PermissionsString[]) {
         this.data.permissions = perms;
         return this;
     }
 
+    /**
+     * The cooldown time left for an user.
+     * @param userId
+     * @param cooldown The cooldown of the command, this has to be given because the command cooldown might be dynamic.
+     * @returns
+     */
     getCooldownTimeLeft(userId: string, cooldown: number) {
         if (!cooldown) return 0;
 
@@ -102,7 +150,10 @@ export class NekoCommand<Args extends [...NekoArg[]] = [], Extras = any> {
     }
 
     hasCooldown(userId: string, cooldown: number) {
-        return this.getCooldownTimeLeft(userId, cooldown) !== 0;
+        /**
+         * We do not care about those cooldowns that are under a second.
+         */
+        return this.getCooldownTimeLeft(userId, cooldown) >= 1e3;
     }
 
     deleteCooldown(userId: string) {
@@ -114,6 +165,11 @@ export class NekoCommand<Args extends [...NekoArg[]] = [], Extras = any> {
         return true;
     }
 
+    /**
+     * Defers all the command responses.
+     * @param ephemeral
+     * @returns
+     */
     defer(ephemeral: boolean) {
         this.data.defer = ephemeral;
         return this;
@@ -135,8 +191,6 @@ export class NekoCommand<Args extends [...NekoArg[]] = [], Extras = any> {
         return data;
     }
 
-
-
     static async handle(input: ChatInputCommandInteraction<"cached">) {
         const client = input.client as NekoClient;
         const command = client.manager.getCommand(input);
@@ -153,7 +207,7 @@ export class NekoCommand<Args extends [...NekoArg[]] = [], Extras = any> {
                 if (command.hasCooldown(input.user.id, cd)) {
                     const error = await client.options.factories?.cooldownMessage?.call(client, input, command.data.name, command.getCooldownTimeLeft(input.user.id, cd));
                     if (!error) return;
-                    await input[input.replied ? "editReply" : "reply"](error);
+                    await replyInteraction(input, error);
                     return;
                 }
 
@@ -165,11 +219,13 @@ export class NekoCommand<Args extends [...NekoArg[]] = [], Extras = any> {
 
             const extras = await command.data.extras?.call(client, input, command);
 
-            if (command.data.check) {
-                const check = await command.data.check.call(client, input, command, extras);
-                if (check !== true) {
-                    if (!check) return;
-                    return void await input[input.replied ? "editReply" : "reply"](check);
+            if (command.data.conditions.length) {
+                for (const condition of command.data.conditions) {
+                    const res = await condition.call(client, input, command, extras);
+                    if (res !== true) {
+                        if (!res) return;
+                        return void await replyInteraction(input, res);
+                    }
                 }
             }
 
@@ -180,7 +236,6 @@ export class NekoCommand<Args extends [...NekoArg[]] = [], Extras = any> {
             }
         } catch (error) {
             await handleError(input, error);
-            console.error(error);
         }
     }
 }

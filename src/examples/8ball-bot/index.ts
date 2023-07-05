@@ -1,5 +1,5 @@
 import { GatewayIntentBits } from "discord.js";
-import { NekoClient } from "../../src/index.js";
+import { NekoClient } from "../../index.js";
 
 const client = new NekoClient({
     intents: [

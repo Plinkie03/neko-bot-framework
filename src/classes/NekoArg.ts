@@ -1,8 +1,9 @@
 import { ApplicationCommandOptionChoiceData, ApplicationCommandOptionData, ApplicationCommandOptionType, AutocompleteInteraction, ChannelType, ChatInputCommandInteraction } from "discord.js";
 import { ArgType } from "../typings/enums/ArgType.js";
 import { NekoClient } from "../core/NekoClient.js";
-import getNekoClient from "../functions/getNekoClient.js";
-import handleError from "../functions/handleInteractionError.js";
+import { getNekoClient } from "../functions/getNekoClient.js";
+import { handleInteractionError as handleError } from "../functions/handleInteractionError.js";
+import { getInteractionName } from "../index.js";
 
 export interface IArgData {
     type: ArgType
@@ -19,7 +20,7 @@ export interface IArgData {
 }
 
 export class NekoArg<Name extends string = string, Type = unknown> {
-    private readonly data = {} as IArgData;
+    public readonly data = {} as IArgData;
 
     constructor(name?: Name) {
         if (name) this.data.name = name;
@@ -148,6 +149,12 @@ export class NekoArg<Name extends string = string, Type = unknown> {
                 value = input.options.getString(this.data.name, this.data.required);
                 break;
             }
+        }
+
+        if (value === undefined) {
+            const err = await client.options.factories?.argErrorMessage?.call(client, input, this, getInteractionName(input));
+            if (err) await input[input.deferred ? "editReply" : "reply"](err);
+            return value;
         }
 
         return value as Type;

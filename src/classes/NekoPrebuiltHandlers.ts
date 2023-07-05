@@ -1,7 +1,6 @@
-import { ChatInputCommandInteraction, EmbedBuilder, Interaction, codeBlock } from "discord.js";
+import { ApplicationCommandOptionType, ChatInputCommandInteraction, EmbedBuilder, Interaction, codeBlock } from "discord.js";
 import { getNekoClient } from "../functions/getNekoClient.js";
 import { NekoCommand } from "./NekoCommand.js";
-import { TimeParser } from "../constants.js";
 import { IFactoriesData, NekoClient, SendableArgs } from "../core/NekoClient.js";
 import { NekoInteractionEvent } from "./NekoInteractionEvent.js";
 import { NekoArg } from "./NekoArg.js";
@@ -11,6 +10,31 @@ import { handleInteractionError as handleError } from "../functions/handleIntera
 export class NekoPrebuiltHandlers {
     // eslint-disable-next-line no-useless-constructor
     private constructor() {}
+
+    static argErrorMessage(...[ input, arg, name ]: Parameters<Exclude<IFactoriesData["argErrorMessage"], undefined>>): SendableArgs {
+        return {
+            embeds: [
+                new EmbedBuilder()
+                    .setColor("Red")
+                    .setTitle("Arg Error")
+                    .setAuthor({
+                        name: input.user.username,
+                        iconURL: input.user.displayAvatarURL()
+                    })
+                    .setFields([
+                        {
+                            name: "Expected",
+                            value: `${arg.data.customType ?? ApplicationCommandOptionType[arg.data.realArgType]}`
+                        }
+                    ])
+                    .setTimestamp()
+                    .setDescription(`Given value does not meet the argument criteria for \`${arg.data.name}\``)
+                    .setFooter({
+                        text: "Please supply a valid value!"
+                    })
+            ]
+        };
+    }
 
     static async interactionHandler(...[ input ]: Parameters<EventHandler<"interactionCreate">>) {
         if (input.inCachedGuild()) {
@@ -114,7 +138,7 @@ export class NekoPrebuiltHandlers {
                         iconURL: input.user.displayAvatarURL()
                     })
                     .setTimestamp()
-                    .setDescription(`You will be able to use \`${command}\` again after \`${TimeParser.parseToString(timeLeft)}\``)
+                    .setDescription(`You will be able to use \`${command}\` again after \`${(timeLeft / 1e3).toFixed(2)} seconds\``)
                     .setTitle("Cooldown Active")
             ]
         };
