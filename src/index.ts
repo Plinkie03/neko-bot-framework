@@ -18,6 +18,5 @@ export * from "./functions/getInteractionName.js";
 export * from "./functions/getNekoClient.js";
 export * from "./functions/handleInteractionError.js";
 export * from "./functions/replyInteraction.js";
-export * from "./functions/writeExports.js";
 export * from "./typings/enums/ArgType.js";
 export * from "./typings/enums/LoggingType.js";
