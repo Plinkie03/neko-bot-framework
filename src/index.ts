@@ -1,4 +1,5 @@
 export * from "./classes/Formatters.js";
+export * from "./classes/Logger.js";
 export * from "./classes/Markdown.js";
 export * from "./classes/NekoArg.js";
 export * from "./classes/NekoArgType.js";
@@ -19,3 +20,4 @@ export * from "./functions/handleInteractionError.js";
 export * from "./functions/replyInteraction.js";
 export * from "./functions/writeExports.js";
 export * from "./typings/enums/ArgType.js";
+export * from "./typings/enums/LoggingType.js";

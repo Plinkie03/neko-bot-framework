@@ -5,6 +5,7 @@ import { NekoCommand } from "../classes/NekoCommand.js";
 import { NekoCommandError } from "../classes/NekoCommandError.js";
 import { NekoArg } from "../index.js";
 import { TimedAction } from "../classes/TimedAction.js";
+import { Logger } from "../classes/Logger.js";
 
 export type SendableArgs = Exclude<Parameters<ChatInputCommandInteraction<"cached">["reply"]>[0], string>
 
@@ -68,14 +69,14 @@ export class NekoClient extends Client<true> {
         }
 
         if (this.options.gcEvery) {
-            if (window.gc) {
+            if (global.gc) {
                 new TimedAction(
-                    window.gc,
+                    global.gc,
                     this.options.gcEvery,
                     true
                 );
             } else {
-                console.warn("`gcEvery` has been defined but the GC was not exposed to node.");
+                Logger.warn("'gcEvery' has been defined but the GC was not exposed to node.");
             }
         }
     }

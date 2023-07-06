@@ -10,6 +10,7 @@ const client = new NekoClient({
         "Guilds"
     ],
     useInteractionHandler: true,
+    gcEvery: 10_000,
     useCommandHandler: true,
     registerCommandsOnReady: true,
     paths: {
