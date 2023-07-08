@@ -120,7 +120,8 @@ export class NekoArg<Name extends string = string, Type = unknown> {
         if (!arg?.data.autocomplete) return;
 
         try {
-            await input.respond(await arg.data.autocomplete.call(client, input, value));
+            const choices = await arg.data.autocomplete.call(client, input, value)
+            await input.respond(choices.slice(0, 25));
         } catch (error) {
             await handleError(input, error);
             console.error(error);
