@@ -22,11 +22,11 @@ export type CommandConditionFn<Args extends [...NekoArg[]], Extras> = (this: Nek
 export interface ICommandData<Args extends [...NekoArg[]], Extras> {
     name: string
     description: string
-    nsfw: boolean
+    nsfw?: boolean
     permissions?: PermissionsString[]
     defer?: boolean
     dmAllowed?: boolean
-    conditions: CommandConditionFn<Args, Extras>[]
+    conditions?: CommandConditionFn<Args, Extras>[]
     cooldown?: number | ((this: NekoClient, input: ChatInputCommandInteraction<"cached">, command: NekoCommand<Args, Extras>) => number | Promise<number>)
     extras?: (this: NekoClient, input: ChatInputCommandInteraction<"cached">, command: NekoCommand<Args, Extras>) => Extras
     args?: [...Args]
@@ -219,7 +219,7 @@ export class NekoCommand<Args extends [...NekoArg[]] = [], Extras = any> {
 
             const extras = await command.data.extras?.call(client, input, command);
 
-            if (command.data.conditions.length) {
+            if (command.data.conditions?.length) {
                 for (const condition of command.data.conditions) {
                     const res = await condition.call(client, input, command, extras);
                     if (res !== true) {

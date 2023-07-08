@@ -4,6 +4,7 @@ import { getNekoClient } from "./getNekoClient.js";
 import { NekoCommandError } from "../classes/NekoCommandError.js";
 import { getInteractionName } from "./getInteractionName.js";
 import { replyInteraction } from "./replyInteraction.js";
+import { Logger } from "../index.js";
 
 export async function handleInteractionError(input: Interaction<"cached">, error: unknown) {
     const client = getNekoClient(input);
@@ -21,4 +22,6 @@ export async function handleInteractionError(input: Interaction<"cached">, error
         const msg = await client.options.factories?.unknownErrorMessage?.call(client, input, name, error);
         await reply(msg);
     }
+
+    Logger.error(error);
 }
