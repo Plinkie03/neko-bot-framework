@@ -9,9 +9,7 @@ export class NekoResources {
         const results = new Array<ClassInstance<T[number]>>();
 
         for (const file of tree) {
-            if (file.isDirectory()) {
-                results.push(...await this.loadAllFiles<T>(`${file.path}/${file.name}`, ...classes));
-            } else {
+            if (file.isFile()) {
                 results.push(...await this.loadFile<T>(file.path, file.name, ...classes));
             }
         }
