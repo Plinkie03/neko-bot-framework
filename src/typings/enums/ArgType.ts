@@ -2,5 +2,6 @@ export enum ArgType {
     Custom,
     Integer,
     Float,
-    String
+    String,
+    Enum
 }

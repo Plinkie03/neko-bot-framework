@@ -5,6 +5,13 @@ import { getNekoClient } from "../functions/getNekoClient.js";
 import { handleInteractionError as handleError } from "../functions/handleInteractionError.js";
 import { getInteractionName } from "../index.js";
 
+export type EnumLike<T = any> = {
+    [id: string]: T | string;
+    [nu: number]: string;
+};
+
+export type GetEnum<T> = T extends EnumLike<infer P> ? P : never;
+
 export interface IArgData {
     type: ArgType
     name: string
@@ -15,6 +22,7 @@ export interface IArgData {
     min?: number
     max?: number
     channelTypes?: ChannelType[]
+    enum?: EnumLike
     default?: unknown
     description: string
 }
@@ -43,6 +51,13 @@ export class NekoArg<Name extends string = string, Type = unknown> {
     setDescription(desc: string) {
         this.data.description = desc;
         return this;
+    }
+
+    setEnum<T extends EnumLike>(en: T): NekoArg<Name, GetEnum<T>> {
+        this.data.enum = en;
+        this.data.type = ArgType.Enum;
+        this.data.realArgType = Object.keys(en).some(x => !isNaN(Number(x))) ? ApplicationCommandOptionType.Integer : ApplicationCommandOptionType.String;
+        return this.cast();
     }
 
     get required(): NekoArg<Name, Exclude<Type, null>> {
@@ -131,6 +146,11 @@ export class NekoArg<Name extends string = string, Type = unknown> {
         let value: unknown = null;
 
         switch (this.data.type) {
+            case ArgType.Enum: {
+                value = input.options[`get${this.data.realArgType === ApplicationCommandOptionType.String ? "String" : "Integer"}`](this.data.name, this.data.required);
+                break;
+            }
+
             case ArgType.Custom: {
                 const got = input.options.get(this.data.name, this.data.required)?.value ?? null;
                 if (got === null) break;
@@ -192,6 +212,10 @@ export class NekoArg<Name extends string = string, Type = unknown> {
             max_length: this.data.max,
             max_value: this.data.max,
             min_value: this.data.min,
+            choices: this.data.type === ArgType.Enum ? Object.keys(this.data.enum!).filter(x => isNaN(Number(x))).map(key => ({
+                name: key,
+                value: this.data.enum![key]
+            })) : undefined,
             channelTypes: this.data.channelTypes,
             type: this.getRealArgType(client),
         } as ApplicationCommandOptionData;

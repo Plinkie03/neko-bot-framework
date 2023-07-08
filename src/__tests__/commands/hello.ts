@@ -1,8 +1,13 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import { ActionRowBuilder, ApplicationCommandOptionType, ButtonBuilder, ButtonStyle } from "discord.js";
 import { NekoArg } from "../../classes/NekoArg.js";
 import { NekoCommand } from "../../classes/NekoCommand.js";
 import { NekoCommandError } from "../../classes/NekoCommandError.js";
 import { CustomArgType } from "../custom/bool.js";
+
+enum Uwu {
+    Owo = "one",
+    Three = "three"
+}
 
 export default new NekoCommand()
     .setName("uwu")
@@ -16,31 +21,9 @@ export default new NekoCommand()
     .addArg(
         new NekoArg("bro")
             .setDescription("yes")
-            .integer.optional
-            .setAutocomplete((i, value) => {
-                if (!value) return [];
-                return [
-                    {
-                        name: value,
-                        value: +value || 0
-                    }
-                ];
-            })
+            .setEnum(Uwu).optional
     )
     .setHandle(async function(input, args, extras) {
-        console.log(args, extras);
-        await input.reply({
-            ephemeral: true,
-            content: "hello",
-            components: [
-                new ActionRowBuilder<ButtonBuilder>()
-                    .addComponents(
-                        new ButtonBuilder()
-                            .setCustomId("gm")
-                            .setLabel("Yo")
-                            .setStyle(ButtonStyle.Primary)
-                    )
-            ]
-        });
+        console.log(args.bro);
         return true;
     });
