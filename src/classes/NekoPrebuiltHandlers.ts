@@ -75,7 +75,6 @@ export class NekoPrebuiltHandlers {
                     await handler.data.handle.call(client, input as any, await handler.data.extras?.call(client, input as any));
                 } catch (error) {
                     await handleError(input, error);
-                    console.error(error);
                 } finally {
                     break;
                 }

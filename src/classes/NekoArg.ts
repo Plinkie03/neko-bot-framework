@@ -3,7 +3,7 @@ import { ArgType } from "../typings/enums/ArgType.js";
 import { NekoClient } from "../core/NekoClient.js";
 import { getNekoClient } from "../functions/getNekoClient.js";
 import { handleInteractionError as handleError } from "../functions/handleInteractionError.js";
-import { getInteractionName } from "../index.js";
+import { Logger, getInteractionName } from "../index.js";
 
 export type EnumLike<T = any> = {
     [id: string]: T | string;
@@ -124,7 +124,6 @@ export class NekoArg<Name extends string = string, Type = unknown> {
             await input.respond(choices.slice(0, 25));
         } catch (error) {
             await handleError(input, error);
-            console.error(error);
         }
     }
 
