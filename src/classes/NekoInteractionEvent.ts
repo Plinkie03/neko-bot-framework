@@ -29,7 +29,7 @@ interface INekoInteractionEventData<T extends keyof InteractionTypes, Extras> {
     defer?: boolean
     deferUpdate?: boolean
     includes?: string
-    ownerOnly?: string
+    ownerOnly?: boolean
     equals?: string
 
     /**
@@ -67,6 +67,11 @@ export class NekoInteractionEvent<T extends keyof InteractionTypes = keyof Inter
 
     includes(str: string) {
         this.data.includes = str;
+        return this;
+    }
+
+    setOwnerOnly() {
+        this.data.ownerOnly = true;
         return this;
     }
 
