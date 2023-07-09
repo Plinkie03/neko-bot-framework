@@ -159,9 +159,9 @@ export class NekoManager {
         if (command) {
             if (command instanceof NekoCommand) return command;
             else {
-                const col = command.get(sub!)!;
+                const col = command.get(group ?? sub!)!;
                 if (col instanceof NekoCommand) return col ?? null;
-                else return col.get(group!) ?? null;
+                else return col.get(sub!) ?? null;
             }
         }
 

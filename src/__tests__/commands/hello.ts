@@ -18,12 +18,13 @@ export default new NekoCommand()
             userId: i.user.id
         };
     })
+    .defer(false)
     .addArg(
         new NekoArg("bro")
             .setDescription("yes")
             .setEnum(Uwu).optional
     )
     .setHandle(async function(input, args, extras) {
-        console.log(args.bro);
+        await input.editReply("cope");
         return true;
     });
