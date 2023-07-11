@@ -34,9 +34,12 @@ export interface ICommandData<Args extends [...NekoArg[]], Extras> {
 }
 
 export class NekoCommand<Args extends [...NekoArg[]] = [], Extras = any> {
+    private static readonly locks = new Set<string>();
+
     public static readonly Error = NekoCommandError;
     public readonly data = {} as ICommandData<Args, Extras>;
-    public cooldowns = new Collection<string, number>();
+
+    public readonly cooldowns = new Collection<string, number>();
 
     setExtras<Extras>(cb: ICommandData<Args, Extras>["extras"]) {
         this.data.extras = cb as any;
@@ -193,49 +196,71 @@ export class NekoCommand<Args extends [...NekoArg[]] = [], Extras = any> {
 
     static async handle(input: ChatInputCommandInteraction<"cached">) {
         const client = input.client as NekoClient;
+
+        if (this.isLocked(input.user.id)) return;
+
         const command = client.manager.getCommand(input);
         if (!command) return;
 
         try {
-            if (command.data.defer !== undefined) {
-                await input.deferReply({ ephemeral: command.data.defer });
-            }
+            runner: {
+                this.lock(input.user.id);
 
-            const cd = typeof command.data.cooldown === "function" ? await command.data.cooldown.call(client, input, command) : command.data.cooldown;
-
-            if (cd) {
-                if (command.hasCooldown(input.user.id, cd)) {
-                    const error = await client.options.factories?.cooldownMessage?.call(client, input, command.data.name, command.getCooldownTimeLeft(input.user.id, cd));
-                    if (!error) return;
-                    await replyInteraction(input, error);
-                    return;
+                if (command.data.defer !== undefined) {
+                    await input.deferReply({ ephemeral: command.data.defer });
                 }
 
-                command.deleteCooldown(input.user.id);
-            }
+                const cd = typeof command.data.cooldown === "function" ? await command.data.cooldown.call(client, input, command) : command.data.cooldown;
 
-            const args = await NekoArg.handle<{}>(input, command.data.args);
-            if (args === null) return;
+                if (cd) {
+                    if (command.hasCooldown(input.user.id, cd)) {
+                        const error = await client.options.factories?.cooldownMessage?.call(client, input, command.data.name, command.getCooldownTimeLeft(input.user.id, cd));
+                        if (!error) break runner;
+                        await replyInteraction(input, error);
+                        break runner;
+                    }
 
-            const extras = await command.data.extras?.call(client, input, command);
+                    command.deleteCooldown(input.user.id);
+                }
 
-            if (command.data.conditions?.length) {
-                for (const condition of command.data.conditions) {
-                    const res = await condition.call(client, input, command, extras);
-                    if (res !== true) {
-                        if (!res) return;
-                        return void await replyInteraction(input, res);
+                const args = await NekoArg.handle<{}>(input, command.data.args);
+                if (args === null) break runner;
+
+                const extras = await command.data.extras?.call(client, input, command);
+
+                if (command.data.conditions?.length) {
+                    for (const condition of command.data.conditions) {
+                        const res = await condition.call(client, input, command, extras);
+                        if (res !== true) {
+                            if (!res) break runner;
+                            await replyInteraction(input, res);
+                            break runner;
+                        }
                     }
                 }
-            }
 
-            const res = await command.data.handle.call(client, input, args, extras);
+                const res = await command.data.handle.call(client, input, args, extras);
 
-            if (res) {
-                if (cd) command.addCooldown(input.user.id, cd);
+                if (res) {
+                    if (cd) command.addCooldown(input.user.id, cd);
+                }
             }
         } catch (error) {
             await handleError(input, error);
+        } finally {
+            this.unlock(input.user.id);
         }
+    }
+
+    private static lock(userId: string) {
+        return this.locks.add(userId);
+    }
+
+    private static unlock(userId: string) {
+        return this.locks.delete(userId);
+    }
+
+    private static isLocked(userId: string) {
+        return this.locks.has(userId);
     }
 }
