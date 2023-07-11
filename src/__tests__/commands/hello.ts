@@ -22,7 +22,9 @@ export default new NekoCommand()
     .addArg(
         new NekoArg("bro")
             .setDescription("yes")
-            .setEnum(Uwu).optional
+            .string.required.setAutocomplete(function(i, q) {
+                return [];
+            })
     )
     .setHandle(async function(input, args, extras) {
         await input.editReply("cope");

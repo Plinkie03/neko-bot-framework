@@ -3,7 +3,7 @@ import { ArgType } from "../typings/enums/ArgType.js";
 import { NekoClient } from "../core/NekoClient.js";
 import { getNekoClient } from "../functions/getNekoClient.js";
 import { handleInteractionError as handleError } from "../functions/handleInteractionError.js";
-import { Logger, getInteractionName } from "../index.js";
+import { getInteractionName } from "../index.js";
 
 export type EnumLike<T = any> = {
     [id: string]: T | string;
