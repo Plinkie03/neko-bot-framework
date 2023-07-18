@@ -6,6 +6,7 @@ export * from "./classes/NekoArgType.js";
 export * from "./classes/NekoCommand.js";
 export * from "./classes/NekoCommandError.js";
 export * from "./classes/NekoEvent.js";
+export * from "./classes/NekoGlobalCondition.js";
 export * from "./classes/NekoInteractionEvent.js";
 export * from "./classes/NekoPrebuiltHandlers.js";
 export * from "./classes/TimedAction.js";
