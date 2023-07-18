@@ -6,6 +6,7 @@ import { NekoInteractionEvent } from "./NekoInteractionEvent.js";
 import { NekoArg } from "./NekoArg.js";
 import { EventHandler } from "./NekoEvent.js";
 import { handleInteractionError as handleError } from "../functions/handleInteractionError.js";
+import { replyInteraction } from "../index.js";
 
 export class NekoPrebuiltHandlers {
     // eslint-disable-next-line no-useless-constructor
@@ -36,8 +37,25 @@ export class NekoPrebuiltHandlers {
         };
     }
 
+    private static async verifyGlobalConditions(...[ input ]: Parameters<EventHandler<"interactionCreate">>): Promise<boolean> {
+        if (!input.inCachedGuild()) return false;
+        const client = getNekoClient(input);
+        // eslint-disable-next-line dot-notation
+        for (const condition of client.manager["globalConditions"]) {
+            const run = await condition.handle.call(client, input);
+            if (run === true) continue;
+            else if (run) {
+                await replyInteraction(input, run);
+            }
+            return false;
+        }
+        return true;
+    }
+
     static async interactionHandler(...[ input ]: Parameters<EventHandler<"interactionCreate">>) {
         if (input.inCachedGuild()) {
+            if (!(await this.verifyGlobalConditions(input))) return;
+
             const type = NekoInteractionEvent.getInteractionType(input);
             if (!type) return;
 
@@ -84,6 +102,7 @@ export class NekoPrebuiltHandlers {
 
     static async commandHandler(...[ input ]: Parameters<EventHandler<"interactionCreate">>) {
         if (input.inCachedGuild()) {
+            if (!(await this.verifyGlobalConditions(input))) return;
             if (input.isChatInputCommand()) await NekoCommand.handle(input);
             else if (input.isAutocomplete()) await NekoArg.handleAutocomplete(input);
         }

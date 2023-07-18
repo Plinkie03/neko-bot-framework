@@ -7,8 +7,10 @@ import { NekoArgType } from "../classes/NekoArgType.js";
 import { NekoEvent } from "../classes/NekoEvent.js";
 import { NekoPrebuiltHandlers } from "../classes/NekoPrebuiltHandlers.js";
 import { InteractionTypes, NekoInteractionEvent } from "../classes/NekoInteractionEvent.js";
+import { NekoGlobalCondition } from "../classes/NekoGlobalCondition.js";
 
 export class NekoManager {
+    private readonly globalConditions = new Array<NekoGlobalCondition>();
     private readonly interactionHandlers = new Collection<keyof InteractionTypes, NekoInteractionEvent[]>();
     private readonly events = new Collection<keyof ClientEvents, NekoEvent[]>();
     private readonly customArgTypes = new Collection<unknown, NekoArgType>();
@@ -55,6 +57,14 @@ export class NekoManager {
         if (paths.events) {
             await this.registerEvents(paths.events);
         }
+
+        if (paths.globalConditions) {
+            await this.registerGlobalConditions(paths.globalConditions);
+        }
+    }
+
+    private async registerGlobalConditions(path: string) {
+        this.globalConditions.push(...(await NekoResources.loadAllFiles(path, NekoGlobalCondition)));
     }
 
     private async registerInteractionHandlers(path: string) {

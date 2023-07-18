@@ -10,7 +10,7 @@ export async function handleInteractionError(input: Interaction<"cached">, error
     const client = getNekoClient(input);
     const name = getInteractionName(input);
 
-    const reply = async (args?: SendableArgs) => {
+    const reply = async (args?: Awaited<SendableArgs>) => {
         if (!args) return;
         return replyInteraction(input, args);
     };

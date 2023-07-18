@@ -7,12 +7,13 @@ import { NekoArg } from "../index.js";
 import { TimedAction } from "../classes/TimedAction.js";
 import { Logger } from "../classes/Logger.js";
 
-export type SendableArgs = Exclude<Parameters<ChatInputCommandInteraction<"cached">["reply"]>[0], string>
+export type SendableArgs = Exclude<Parameters<ChatInputCommandInteraction<"cached">["reply"]>[0], string> | false | undefined | Promise<Exclude<Parameters<ChatInputCommandInteraction<"cached">["reply"]>[0], string> | false | undefined>
 
 export interface IPathsData {
     commands: string
     events: string
     interactionEvents: string
+    globalConditions: string
     argDefinitions: string
 }
 
