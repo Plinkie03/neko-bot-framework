@@ -56,6 +56,12 @@ export class NekoPrebuiltHandlers {
         if (input.inCachedGuild()) {
             if (!(await NekoPrebuiltHandlers.verifyGlobalConditions(input))) return;
 
+            if (input.isChatInputCommand()) {
+                return void await NekoCommand.handle(input);
+            } else if (input.isAutocomplete()) {
+                return void await NekoArg.handleAutocomplete(input);
+            }
+
             const type = NekoInteractionEvent.getInteractionType(input);
             if (!type) return;
 
@@ -97,14 +103,6 @@ export class NekoPrebuiltHandlers {
                     break;
                 }
             }
-        }
-    }
-
-    static async commandHandler(...[ input ]: Parameters<EventHandler<"interactionCreate">>) {
-        if (input.inCachedGuild()) {
-            if (!(await NekoPrebuiltHandlers.verifyGlobalConditions(input))) return;
-            if (input.isChatInputCommand()) await NekoCommand.handle(input);
-            else if (input.isAutocomplete()) await NekoArg.handleAutocomplete(input);
         }
     }
 

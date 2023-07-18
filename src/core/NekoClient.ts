@@ -28,7 +28,6 @@ export interface INekoClientOptions extends ClientOptions {
     paths?: Partial<IPathsData>
     factories?: Partial<IFactoriesData>
     registerCommandsOnReady?: boolean
-    useCommandHandler?: boolean
     gcEvery?: number
     useInteractionHandler?: boolean
 }
@@ -57,10 +56,6 @@ export class NekoClient extends Client<true> {
     }
 
     #setup() {
-        if (this.options.useCommandHandler) {
-            this.on("interactionCreate", NekoPrebuiltHandlers.commandHandler.bind(this));
-        }
-
         if (this.options.registerCommandsOnReady) {
             this.once("ready", NekoPrebuiltHandlers.registerCommands);
         }
