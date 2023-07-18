@@ -54,7 +54,7 @@ export class NekoPrebuiltHandlers {
 
     static async interactionHandler(...[ input ]: Parameters<EventHandler<"interactionCreate">>) {
         if (input.inCachedGuild()) {
-            if (!(await this.verifyGlobalConditions(input))) return;
+            if (!(await NekoPrebuiltHandlers.verifyGlobalConditions(input))) return;
 
             const type = NekoInteractionEvent.getInteractionType(input);
             if (!type) return;
@@ -102,7 +102,7 @@ export class NekoPrebuiltHandlers {
 
     static async commandHandler(...[ input ]: Parameters<EventHandler<"interactionCreate">>) {
         if (input.inCachedGuild()) {
-            if (!(await this.verifyGlobalConditions(input))) return;
+            if (!(await NekoPrebuiltHandlers.verifyGlobalConditions(input))) return;
             if (input.isChatInputCommand()) await NekoCommand.handle(input);
             else if (input.isAutocomplete()) await NekoArg.handleAutocomplete(input);
         }
