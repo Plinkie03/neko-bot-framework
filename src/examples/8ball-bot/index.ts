@@ -9,7 +9,6 @@ const client = new NekoClient({
         commands: "./commands",
         events: "./events"
     },
-    useCommandHandler: true,
     useInteractionHandler: true,
     registerCommandsOnReady: true
 });

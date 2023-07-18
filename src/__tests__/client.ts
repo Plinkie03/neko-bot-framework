@@ -11,7 +11,6 @@ const client = new NekoClient({
     ],
     useInteractionHandler: true,
     gcEvery: 10_000,
-    useCommandHandler: true,
     registerCommandsOnReady: true,
     paths: {
         interactionEvents: "./dist/__tests__/handlers",
