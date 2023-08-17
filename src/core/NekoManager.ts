@@ -131,10 +131,12 @@ export class NekoManager {
 
                 for (const [ subKey, subValue ] of value) {
                     if (subValue instanceof NekoCommand) {
+                        // @ts-ignore
                         data.options!.push(
                             subValue.toJSON(this.client, ApplicationCommandOptionType.Subcommand) as any
                         );
                     } else {
+                        // @ts-ignore
                         data.options!.push({
                             name: subKey,
                             description: "Unknown",
