@@ -181,7 +181,7 @@ export class NekoCommand<Args extends [...NekoArg[]] = [], Extras = any> {
     toJSON(client: NekoClient, type?: ApplicationCommandOptionType): ChatInputApplicationCommandData {
         const data: ChatInputApplicationCommandData = {
             type: ApplicationCommandType.ChatInput,
-            defaultMemberPermissions: this.data.permissions,
+            defaultMemberPermissions: this.data.permissions ?? [],
             name: this.data.name,
             dmPermission: this.data.dmAllowed,
             nsfw: this.data.nsfw,
