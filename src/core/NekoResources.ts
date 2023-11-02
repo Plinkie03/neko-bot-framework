@@ -1,7 +1,7 @@
 import { readdirSync } from "fs";
 
-export type ClassInstance<T> = T extends new (...args: any[]) => infer P ? P : never;
-export type ClassType = new (...args: any[]) => any;
+export type ClassInstance<T> = T extends new (...args: any[]) => infer P ? P : T extends abstract new (...args: any[]) => infer P ? P : never;
+export type ClassType = (new (...args: any[]) => any) | (abstract new (...args: any[]) => any);
 
 export class NekoResources {
     static async loadAllFiles<T extends [...ClassType[]]>(path: string, ...classes: [...T]) {
