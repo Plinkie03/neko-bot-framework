@@ -3,5 +3,7 @@ export enum ArgType {
     Integer,
     Float,
     String,
-    Enum
+    Enum,
+    Member,
+    User
 }
