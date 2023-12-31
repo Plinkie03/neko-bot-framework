@@ -5,5 +5,6 @@ export enum ArgType {
     String,
     Enum,
     Member,
-    User
+    User,
+    Attachment
 }

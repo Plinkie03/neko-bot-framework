@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionChoiceData, ApplicationCommandOptionData, ApplicationCommandOptionType, AutocompleteInteraction, ChannelType, ChatInputCommandInteraction, GuildMember, User } from "discord.js";
+import { ApplicationCommandOptionChoiceData, ApplicationCommandOptionData, ApplicationCommandOptionType, Attachment, AutocompleteInteraction, ChannelType, ChatInputCommandInteraction, GuildMember, User } from "discord.js";
 import { ArgType } from "../typings/enums/ArgType.js";
 import { NekoClient } from "../core/NekoClient.js";
 import { getNekoClient } from "../functions/getNekoClient.js";
@@ -79,6 +79,12 @@ export class NekoArg<Name extends string = string, Type = unknown> {
     get member(): NekoArg<Name, GuildMember> {
         this.data.type = ArgType.Member;
         this.data.realArgType = ApplicationCommandOptionType.User;
+        return this.cast();
+    }
+
+    get attachment(): NekoArg<Name, Attachment> {
+        this.data.type = ArgType.Attachment;
+        this.data.realArgType = ApplicationCommandOptionType.Attachment;
         return this.cast();
     }
 
@@ -187,6 +193,11 @@ export class NekoArg<Name extends string = string, Type = unknown> {
 
             case ArgType.Integer: {
                 value = input.options.getInteger(this.data.name, this.data.required);
+                break;
+            }
+
+            case ArgType.Attachment: {
+                value = input.options.getAttachment(this.data.name, this.data.required);
                 break;
             }
 
