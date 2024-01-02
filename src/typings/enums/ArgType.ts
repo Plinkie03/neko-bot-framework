@@ -6,5 +6,6 @@ export enum ArgType {
     Enum,
     Member,
     User,
+    Channel,
     Attachment
 }
